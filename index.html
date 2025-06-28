@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + React</title>
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+<script src="https://unpkg.com/@telnyx/webrtc@2.22.12/lib/bundle.js"></script>
+
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+    <!-- WebRTC adapter -->
+<script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+
+<!-- Telnyx SDK -->
+<script src="https://unpkg.com/@telnyx/webrtc@2.22.12/lib/bundle.js"></script>
+
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const client = new TelnyxWebRTC.TelnyxRTC({
+      anonymous_login: {
+        target_id: 'assistant-b185fd89-a736-48d8-af9b-19573e2f3175',
+        target_type: 'ai_assistant'
+      }
+    });
+
+    let activeCall = null;
+
+    client.on('telnyx.ready', () => {
+      console.log("✅ Telnyx client connected.");
+      const btn = document.getElementById('call');
+      if (btn) btn.disabled = false;
+    });
+
+    client.connect();
+
+    window.startCall = async () => {
+      const opus = RTCRtpReceiver.getCapabilities('audio').codecs
+        .find(c => c.mimeType.toLowerCase().includes('opus'));
+
+      activeCall = client.newCall({
+        destinationNumber: '',
+        preferred_codecs: [opus],
+        remoteElement: 'remoteAudio',
+        audio: true,
+        video: false
+      });
+
+      document.getElementById('call').disabled = true;
+      document.getElementById('hangup').disabled = false;
+    };
+
+    window.hangUp = () => {
+      if (activeCall) {
+        activeCall.hangup();
+        document.getElementById('call').disabled = false;
+        document.getElementById('hangup').disabled = true;
+      }
+    };
+  });
+</script>
+
+  </body>
+</html>

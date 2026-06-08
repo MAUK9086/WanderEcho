@@ -1,71 +1,143 @@
 import React, { useState } from "react";
-import MicButton from "./MicButton";
-import PersonalitySelector from "./PS";
+import { useNavigate } from "react-router-dom";
+import { useRoom } from "../hooks/useRoom";
+import { FaUsers, FaDoorOpen, FaPlus } from "react-icons/fa";
 
-const messages = [
-  { id: 1, sender: "Emma", text: "Hey everyone, just reached Paris!" },
-  { id: 2, sender: "Liam", text: "Same here! Let’s use WanderEcho to explore nearby spots." },
-  { id: 3, sender: "Olivia", text: "Guys, the AI just told me about Notre-Dame Cathedral — it’s 5 mins from here!" },
-  { id: 4, sender: "Noah", text: "Nice! It recommended a local café near the Seine for me." },
-  { id: 5, sender: "Emma", text: "It showed me the Eiffel Tower’s history and best photo points 😍" },
-  { id: 6, sender: "Liam", text: "Let’s all meet at the tower around sunset? The view will be amazing." },
-  { id: 7, sender: "Olivia", text: "Sounds good. I’ll follow the route on the map now." },
-  { id: 8, sender: "Noah", text: "WanderEcho’s voice guide is actually helpful 😄" },
-  { id: 9, sender: "Emma", text: "See you all in 20 mins!" }
-];
+const GroupLobby = () => {
+  const navigate = useNavigate();
+  const { displayName, saveName, createRoom, joinRoom, error } = useRoom();
+  const [nameInput, setNameInput] = useState(displayName);
+  const [codeInput, setCodeInput] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [joining, setJoining] = useState(false);
+  const [localError, setLocalError] = useState("");
 
+  const ensureName = () => {
+    const name = nameInput.trim() || "Traveler";
+    saveName(name);
+    return name;
+  };
 
-const currentUser = "Liam";
+  const handleCreate = async () => {
+    ensureName();
+    setCreating(true);
+    setLocalError("");
+    try {
+      const code = await createRoom();
+      if (code) navigate(`/room/${code}`);
+    } catch (e) {
+      setLocalError("Failed to create room. Check your Firebase config.");
+    }
+    setCreating(false);
+  };
 
-const GroupChat = () => {
-  const [onCall, setOnCall] = useState(false);
-
-  const toggleCall = () => {
-    setOnCall(!onCall);
+  const handleJoin = async () => {
+    const code = codeInput.trim().toUpperCase();
+    if (!code || code.length < 4) {
+      setLocalError("Enter a valid room code.");
+      return;
+    }
+    ensureName();
+    setJoining(true);
+    setLocalError("");
+    const ok = await joinRoom(code);
+    if (ok) {
+      navigate(`/room/${code}`);
+    } else {
+      setLocalError(error || "Room not found.");
+    }
+    setJoining(false);
   };
 
   return (
-    <div className="h-[90vh] bg-gradient-to-br from-white via-purple-50 to-purple-100">
-      <div className="relative flex flex-col w-screen h-[90vh] bg-white shadow-lg rounded-lg">
-        {/* Call Button */}
-      <MicButton onCall={onCall} toggleCall={toggleCall} />
-      <PersonalitySelector/>
-        
-<div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col-reverse gap-3 bg-gradient-to-br from-purple-50 to-purple-100">
-
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`max-w-[75%] px-4 py-2 rounded-lg text-sm sm:text-base break-words ${
-                msg.sender === currentUser
-                  ? "bg-purple-600 text-white ml-auto"
-                  : "bg-white border border-purple-200 text-gray-900 mr-auto"
-              }`}
-            >
-              {msg.sender !== currentUser && (
-                <div className="font-semibold text-xs text-purple-600 mb-1">
-                  {msg.sender}
-                </div>
-              )}
-              {msg.text}
-            </div>
-          ))}
+    <div className="min-h-[calc(100vh-57px)] bg-duo-bg flex flex-col items-center justify-center px-4 py-10">
+      <div className="w-full max-w-sm">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 rounded-3xl bg-[#1CB0F6] mx-auto flex items-center justify-center text-4xl mb-4 shadow-[0_5px_0_#0B90D0]">
+            👥
+          </div>
+          <h1 className="text-3xl font-black text-duo-text">Group Rooms</h1>
+          <p className="text-duo-muted font-semibold mt-2">
+            Explore together. Share discoveries in real time.
+          </p>
         </div>
 
-        {/* Input */}
-        <div className="p-3 border-t flex items-center bg-white rounded-b-lg">
+        {/* Display name */}
+        <div className="duo-card mb-4">
+          <label className="text-xs font-extrabold text-duo-muted uppercase tracking-wide block mb-2">
+            Your Name
+          </label>
           <input
             type="text"
-            placeholder="Type your message..."
-            className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-600"
+            value={nameInput}
+            onChange={(e) => setNameInput(e.target.value)}
+            placeholder="Enter your traveler name..."
+            maxLength={24}
+            className="w-full px-4 py-2.5 rounded-2xl border-2 border-duo-border focus:border-duo-green focus:outline-none text-sm font-bold text-duo-text bg-duo-bg placeholder:text-duo-muted"
           />
-          <button className="ml-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
-            Send
+        </div>
+
+        {/* Create room */}
+        <div className="duo-card mb-4">
+          <div className="flex items-center gap-2 mb-3">
+            <FaPlus className="text-duo-green" size={14} />
+            <h2 className="font-extrabold text-duo-text">Create a Room</h2>
+          </div>
+          <p className="text-xs text-duo-muted font-semibold mb-4">
+            Start a new tour room and share the code with friends.
+          </p>
+          <button
+            onClick={handleCreate}
+            disabled={creating}
+            className="w-full btn-duo-green py-3 text-sm"
+          >
+            {creating ? "Creating..." : "🚀 Create Room"}
           </button>
         </div>
+
+        {/* Join room */}
+        <div className="duo-card mb-4">
+          <div className="flex items-center gap-2 mb-3">
+            <FaDoorOpen className="text-[#1CB0F6]" size={14} />
+            <h2 className="font-extrabold text-duo-text">Join a Room</h2>
+          </div>
+          <p className="text-xs text-duo-muted font-semibold mb-3">
+            Got a code? Enter it below to join your group.
+          </p>
+          <input
+            type="text"
+            value={codeInput}
+            onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
+            placeholder="e.g. WE4X2K"
+            maxLength={8}
+            className="w-full px-4 py-2.5 rounded-2xl border-2 border-duo-border focus:border-[#1CB0F6] focus:outline-none text-sm font-extrabold text-duo-text bg-duo-bg placeholder:text-duo-muted tracking-widest uppercase mb-3"
+          />
+          <button
+            onClick={handleJoin}
+            disabled={joining}
+            className="w-full btn-duo-blue py-3 text-sm"
+          >
+            {joining ? "Joining..." : "🔗 Join Room"}
+          </button>
+        </div>
+
+        {/* Error */}
+        {(localError || error) && (
+          <div className="bg-[#FFE5E5] border-2 border-[#FF4B4B] rounded-2xl p-3 text-sm font-bold text-[#CC3333] text-center">
+            {localError || error}
+          </div>
+        )}
+
+        {/* Firebase hint */}
+        {!import.meta.env.VITE_FIREBASE_API_KEY && (
+          <div className="mt-4 bg-[#FFF8D5] border-2 border-[#FFC800] rounded-2xl p-3 text-xs font-bold text-[#A07800] text-center">
+            ⚠️ Firebase not configured — see FIREBASE_SETUP.md
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-export default GroupChat;
+export default GroupLobby;

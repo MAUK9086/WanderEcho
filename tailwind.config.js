@@ -6,18 +6,21 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Nunito', 'system-ui', 'sans-serif'],
+      },
       colors: {
-        primary: {
-          50:  '#e6f9f8',
-          100: '#ccf3f1',
-          200: '#99e7e3',
-          300: '#66dbd5',
-          400: '#33cfc7',
-          500: '#00c3b9',
-          600: '#00a9a5', // base
-          700: '#00807d',
-          800: '#005855',
-          900: '#003f3d',
+        duo: {
+          green:    '#58CC02',
+          'green-dark': '#46A302',
+          yellow:   '#FFC800',
+          blue:     '#1CB0F6',
+          red:      '#FF4B4B',
+          bg:       '#F7F7F7',
+          card:     '#FFFFFF',
+          border:   '#E5E5E5',
+          text:     '#3C3C3C',
+          muted:    '#777777',
         },
       },
     },
@@ -25,4 +28,4 @@ export default {
   plugins: [
     require('@tailwindcss/forms'),
   ],
-} 
+}

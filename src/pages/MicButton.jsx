@@ -1,66 +1,73 @@
 import { useState } from "react";
-import { FaMicrophone } from "react-icons/fa";
-import useTelnyx from "../hooks/useTelnyx"; // Make sure this path is correct
+import { FaMicrophone, FaPhoneSlash } from "react-icons/fa";
+import useTelnyx from "../hooks/useTelnyx";
+import { useXP } from "../hooks/useXP";
 
-const MicButton = () => {
+const MicButton = ({ personality }) => {
   const assistantId = "assistant-b185fd89-a736-48d8-af9b-19573e2f3175";
-
   const { connected, startCall, hangUp, remoteAudioRef } = useTelnyx(assistantId);
   const [onCall, setOnCall] = useState(false);
-  const [disabled, setDisabled] = useState(false); // Disable after ending call
+  const { addXP } = useXP();
 
   const handleClick = () => {
-    if (!connected || disabled) return;
-
+    if (!connected) return;
     if (!onCall) {
       startCall();
       setOnCall(true);
     } else {
       hangUp();
       setOnCall(false);
-      setDisabled(true); // 🔒 Disable mic button permanently after call ends
+      addXP(10);
     }
   };
 
+  const statusText = !connected
+    ? "Connecting..."
+    : onCall
+    ? "Tap to end call"
+    : "Tap to start tour";
+
   return (
     <>
-      {/* Custom Animations */}
-      <style>
-        {`
-          @keyframes pulseRing {
-            0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.5); }
-            70% { box-shadow: 0 0 0 20px rgba(168, 85, 247, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
-          }
-          @keyframes scaleBounce {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-          }
-          .animate-call {
-            animation: pulseRing 2s ease-out infinite, scaleBounce 1.5s ease-in-out infinite;
-          }
-        `}
-      </style>
+      <style>{`
+        @keyframes duoPulse {
+          0%   { box-shadow: 0 0 0 0   rgba(255,75,75,0.5); }
+          70%  { box-shadow: 0 0 0 22px rgba(255,75,75,0); }
+          100% { box-shadow: 0 0 0 0   rgba(255,75,75,0); }
+        }
+        .animate-oncall { animation: duoPulse 1.8s ease-out infinite; }
 
-      {/* Mic Button */}
-      <div className="w-full flex justify-center mt-4 sm:mt-6 relative z-50">
+        @keyframes duoIdle {
+          0%,100% { transform: scale(1); }
+          50%      { transform: scale(1.04); }
+        }
+        .animate-idle { animation: duoIdle 2.5s ease-in-out infinite; }
+      `}</style>
+
+      <div className="flex flex-col items-center gap-2">
         <button
           onClick={handleClick}
-          disabled={!connected || disabled}
-          className={`w-20 h-20 rounded-full flex items-center justify-center text-white transition-all duration-300 
-            ${disabled ? "bg-gray-400 cursor-not-allowed"
-              : onCall ? "bg-purple-600 animate-call"
-              : "bg-purple-500 hover:bg-purple-600 shadow-xl"
-            }`}
-          title={
-            disabled ? "Call ended" : onCall ? "End Call" : "Start Call"
-          }
+          disabled={!connected}
+          className={`w-20 h-20 rounded-full flex items-center justify-center text-white transition-all duration-200 ${
+            !connected
+              ? "bg-gray-300 cursor-not-allowed"
+              : onCall
+              ? "bg-[#FF4B4B] animate-oncall"
+              : "bg-duo-green animate-idle"
+          }`}
+          style={onCall ? {} : connected ? { boxShadow: '0 6px 0 #46A302' } : {}}
+          title={statusText}
         >
-          <FaMicrophone size={28} />
+          {onCall ? <FaPhoneSlash size={26} /> : <FaMicrophone size={26} />}
         </button>
+        <span className="text-xs font-bold text-duo-muted">{statusText}</span>
+        {onCall && (
+          <span className="text-xs font-extrabold text-[#FF4B4B] bg-[#FFE5E5] px-2 py-0.5 rounded-full animate-pulse">
+            ● LIVE
+          </span>
+        )}
       </div>
 
-      {/* Audio output */}
       <audio ref={remoteAudioRef} autoPlay hidden />
     </>
   );

@@ -1,32 +1,70 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { FaCompass, FaFire } from 'react-icons/fa';
+import { useXP } from '../hooks/useXP';
 
 const Navbar = () => {
+  const location = useLocation();
+  const { xp, streak } = useXP();
+
+  const links = [
+    { to: '/', label: 'Home' },
+    { to: '/chat', label: 'Voice Tour' },
+    { to: '/groupchat', label: 'Rooms' },
+    { to: '/map', label: 'Map' },
+  ];
+
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50 w-full">
-      <div className="w-full max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
-        <Link to="/" className="text-2xl font-bold text-purple-600 hover:text-purple-700 transition-colors duration-200">
-          Telnyx AI Assistant
+    <nav className="bg-white border-b-2 border-duo-border sticky top-0 z-50 w-full">
+      <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2 font-extrabold text-xl text-duo-green hover:opacity-80 transition-opacity">
+          <FaCompass className="text-duo-yellow" size={22} />
+          WanderEcho
         </Link>
-        <div className="flex space-x-8 -ml-16">
-          {/* <Link 
-            to="/" 
-            className="text-gray-600 hover:text-primary-600 font-medium transition-colors duration-200"
-          >
-            Home
-          </Link> */}
-          <Link 
-            to="/chat" 
-            className="text-gray-600 hover:text-purple-600 font-medium transition-colors duration-200"
-          >
-            Call
-          </Link>
-          <Link 
-            to="/groupchat" 
-            className="text-gray-600 hover:text-purple-600 font-medium transition-colors duration-200"
-          >
-            GroupChat
-          </Link>
+
+        {/* Links */}
+        <div className="hidden sm:flex items-center gap-6">
+          {links.map(({ to, label }) => (
+            <Link
+              key={to}
+              to={to}
+              className={`text-sm font-bold transition-colors duration-200 ${
+                location.pathname === to
+                  ? 'text-duo-green border-b-2 border-duo-green pb-0.5'
+                  : 'text-duo-muted hover:text-duo-text'
+              }`}
+            >
+              {label}
+            </Link>
+          ))}
         </div>
+
+        {/* XP + Streak */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 bg-[#FFF3CD] text-[#A07800] text-xs font-extrabold px-3 py-1.5 rounded-full border border-[#FFE08A]">
+            <FaFire className="text-[#FF9600]" size={12} />
+            <span>{streak}</span>
+          </div>
+          <div className="flex items-center gap-1.5 bg-[#E5F8D0] text-duo-green-dark text-xs font-extrabold px-3 py-1.5 rounded-full border border-[#B8E986]">
+            <span>✨</span>
+            <span>{xp} XP</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile bottom nav */}
+      <div className="sm:hidden flex border-t border-duo-border">
+        {links.map(({ to, label }) => (
+          <Link
+            key={to}
+            to={to}
+            className={`flex-1 text-center py-2 text-xs font-bold transition-colors ${
+              location.pathname === to ? 'text-duo-green' : 'text-duo-muted'
+            }`}
+          >
+            {label}
+          </Link>
+        ))}
       </div>
     </nav>
   );

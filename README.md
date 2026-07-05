@@ -214,7 +214,7 @@ WanderEcho/
 
 ## Credits
 
-Built for **TADHack Global 2025**
+Built for **TADHack Global 2025** — a 48-hour hackathon. This project did not place; it's shared here as a complete, shipped example of end-to-end product work (voice AI integration, real-time backend, mapping) built under time pressure.
 
 **Team:** Paradox  
 **Developer:** Ahmadullah  

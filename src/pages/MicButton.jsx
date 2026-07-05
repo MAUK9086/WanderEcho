@@ -4,7 +4,7 @@ import useTelnyx from "../hooks/useTelnyx";
 import { useXP } from "../hooks/useXP";
 
 const MicButton = ({ personality }) => {
-  const assistantId = "assistant-b185fd89-a736-48d8-af9b-19573e2f3175";
+  const assistantId = import.meta.env.VITE_TELNYX_ASSISTANT_ID;
   const { connected, startCall, hangUp, remoteAudioRef } = useTelnyx(assistantId);
   const [onCall, setOnCall] = useState(false);
   const { addXP } = useXP();

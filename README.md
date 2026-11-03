@@ -18,22 +18,6 @@ Group travel is supported too: create a shared room, invite your travel companio
 
 ---
 
-## Business Case
-
-| Metric | Context |
-|--------|---------|
-| **$7.6B** | Global audio tour market size (2024) |
-| **1.4B+** | International tourist arrivals per year |
-| **0 downloads** | WanderEcho runs fully in the browser |
-| **<2s** | Time from tap to AI voice response |
-| **Free to start** | No account, no credit card, no app store |
-
-**Target users:** Independent travelers, museum visitors, school trip organisers, travel influencers, tour operators looking to augment their offerings.
-
-**Monetisation paths:** Freemium (premium personalities + offline mode), white-label for tourism boards, B2B API for hotel concierge integrations.
-
----
-
 ## Features
 
 ### 🎙️ Voice Tour Guide
